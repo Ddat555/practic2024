@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить магазин</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<!--    <link rel="stylesheet" href="../static/css/css/styles.css">-->
+    <style>
+        .header {
+                text-align: center;
+                padding: 0px 0;
+                width: 100%;
+            }
+            .footer {
+                text-align: center;
+                padding: 0px 0;
+                width: 100%;
+            }
+        .container {
+            max-width: 1000px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<div th:insert="blocks/header :: header" class="header"></div>
+
+<form th:action="@{'/account/createshop'}" method="post"  id="myForm" onsubmit="return validateForm()">
+    <div class="container mt-5">
+        <h1>Создание магазина</h1>
+
+        <div class="form-group mt-4">
+            <h4>Адрес</h4>
+            <input type="text" name="address" class="form-control" placeholder="Введите адрес" id="address" onblur="validField(this, 'address')">
+            <span id="addressError"  style="color: red;"></span>
+        </div>
+
+        <div class="row align-items-center mt-4">
+            <div class="col-auto">
+                <h4>Город: <span id="displayText">отсутствует</span></h4>
+            </div>
+            <div class="col-auto">
+                <div class="dropdown">
+                    <p class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        Выбрать
+                    </p>
+                    <span id="shopError"  style="color: red;"></span>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <div th:each="city : ${citys}">
+                            <li><p class="dropdown-item" th:text="${city.name}" th:data-value="${city.name}" onclick="select(this)"></p></li>
+                        </div>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" name="cityName" id="inputValue" required>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-success">Создать магазин</button>
+            <a th:href="'/account'" class="btn btn-secondary ms-2">Отмена</a>
+        </div>
+    </div>
+</form>
+
+<div th:insert="blocks/footer :: footer" class="footer"></div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+<script>
+    function select(thisElement) {
+        var selectedText = thisElement.innerText;
+        var id = thisElement.getAttribute('data-value');
+        document.getElementById('displayText').innerText = selectedText;
+        document.getElementById('inputValue').value = id;
+    }
+
+     function validField(element, nameField) {
+        var valueField = element.value;
+        var valid = true;
+        var errorMessage = "";
+
+        switch (nameField) {
+            case "address":
+                var errorMessage = "";
+                regular = /^([\u0410-\u044Fa-zA-Z]+\s?[0-9]*)+$/
+                if(valueField.length < 5){
+                    valid = false;
+                    errorMessage = "Адрес должен быть длиной не менее 5 символов.";
+                }
+                else if(!regular.test(valueField)){
+                    valid = false;
+                    errorMessage = "Некорректный адрес.";
+                }
+                break;
+             case "shop":
+                valid = valueField != "" && valueField != null;
+                errorMessage = valid ? "" : "Выберите магазин.";
+                break;
+        }
+
+        var errorElement = document.getElementById(nameField + "Error");
+        if (valid) {
+            element.style.borderColor = "green";
+            errorElement.textContent = "";
+        } else {
+            element.style.borderColor = "red";
+            errorElement.textContent = errorMessage;
+        }
+
+        return valid;
+    }
+
+    function validateForm() {
+        var addressField = document.getElementById("address");
+        var shopField = document.getElementById("inputValue");
+
+        var addressValid = validField(addressField, "address");
+        var shopValid = validField(shopField, "shop");
+
+        console.log(addressField.value)
+        console.log(shopField.value)
+
+        console.log(addressValid)
+        console.log(shopValid)
+
+        if (!addressValid || !shopValid ) {
+            alert("Пожалуйста, заполните все поля корректно перед отправкой формы.");
+            return false;
+        }
+
+        return true;
+    }
+</script>
+
+</body>
+</html>

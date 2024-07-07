@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>О заявке</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<!--    <link rel="stylesheet" href="../static/css/css/styles.css">-->
+    <style>
+        .header {
+                text-align: center;
+                padding: 10px 0;
+                width: 100%;
+            }
+            .footer {
+                text-align: center;
+                padding: 10px 0;
+                width: 100%;
+            }
+    </style>
+    <style>
+        width: 100%;
+          }
+          body {
+                  font-family: Arial, sans-serif;
+                  background-color: #FFFFFF
+                  color: #333;
+                  margin: 0;
+                  padding: 0;
+              }
+          table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+          }
+          th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+          }
+          th {
+              background-color: #f2f2f2;
+          }
+           th:nth-child(1) {
+                  width: 200px; /* Ширина первого заголовка */
+           }
+           th:nth-child(2) {
+                  width: 200px; /* Ширина второго заголовка */
+           }
+    </style>
+</head>
+<body>
+    <div th:insert="blocks/header :: header"/>
+
+    <div class="container my-5">
+        <hr class="my-4"><br>
+        <div class="p-5 text-center bg-body-tertiary rounded-3">
+            <h3 class="text-body-emphasis" th:text="'Заявка № ' + ${order.id}"/>
+            <table>
+                <tr>
+                    <th>Адрес</th>
+                    <td th:text="${order.shop.city.name} + ' , ' + ${order.shop.address} "/>
+                    <th>Заказчик</th>
+                    <td th:text="${order.firm.name}"/>
+                </tr>
+                <tr>
+                    <th>До какого числа</th>
+                    <td  th:text="${#dates.format(order.date_end, 'dd-MM-yyyy')}"/>
+                    <th>Статус</th>
+                    <td th:if="${order.status == 'create'}">Создан</td>
+                    <td th:if="${order.status == 'take'}">В исполнении</td>
+                    <td th:if="${order.status == 'finish'}">Завершен</td>
+                </tr>
+                <tr >
+                    <th>Исполнитель</th>
+                    <td  th:if="${delivery != null}" th:text="${delivery.name}"/>
+                    <td  th:if="${delivery == null}" th:text="Отсутствует"/>
+                </tr>
+                <tr>
+                    <th>Список товаров</th>
+                    <td>
+                        <div th:each="el : ${products}">
+                            <h6>
+                                <span style="font-weight: bold;">Название:</span> <span th:text="${el.name}"></span>
+                                <span style="font-weight: bold;">Количество:</span> <span th:text="${el.count}"></span>
+                            </h6>
+
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <form th:if="${user.role == 'del'}" th:action="@{'/orders/accept/' + ${order.id}}" method="post">
+                <div class="btn-group">
+                    <button th:if="${order.status == 'create'}"
+                            type="submit"
+                            class="btn btn-lg btn-primary"
+                            style="width: 300px;">
+                        Принять
+                    </button>
+                    <button th:if="${order.status != 'create'}"
+                            type="button"
+                            class="btn btn-lg btn-primary disabled"
+                            style="width: 300px;"
+                            disabled>
+                        Принять
+                    </button>
+                </div>
+                <a type="button" class="btn btn-lg btn-secondary" onclick="window.history.back()" style="width: 200px;">
+                    Назад
+                </a>
+            </form>
+            <form th:if="${user.role == 'shop'}">
+                <div class="btn-group">
+                    <a th:if="${order.status == 'create'}"
+                       type="button"
+                       class="btn btn-lg btn-primary"
+                       onclick="window.location.href='/account/myorders/' + ${order.id} + '/edit'"
+                       th:href="'/account/myorders/' + ${order.id} + '/edit'"
+                       style="width: 300px;">
+                        Изменить
+                    </a>
+                    <button th:if="${order.status != 'create'}"
+                            type="button"
+                            class="btn btn-lg btn-primary disabled"
+                            style="width: 300px;"
+                            disabled>
+                        Изменить
+                    </button>
+                </div>
+
+                <a type="button" class="btn btn-lg btn-secondary" href="/account/myorders" style="width: 200px;">
+                    Назад
+                </a>
+            </form>
+
+            <br>
+
+            <form th:if="${user.role == 'shop' and order.status == 'create'}"
+                  th:action="@{|/account/myorders/delete/${order.id}|}" method="post">
+                <button type="submit" class="btn btn-danger" style="width: 500px;">
+                    Отменить
+                </button>
+            </form>
+
+
+        </div>
+    </div>
+
+    <div th:insert="blocks/footer :: footer"/>
+
+</body>
+</html>

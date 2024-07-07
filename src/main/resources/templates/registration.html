@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<!--    <link rel="stylesheet" href="../static/css/css/styles.css">-->
+    <style>
+        .header {
+                text-align: center;
+                padding: 0px 0;
+                width: 100%;
+            }
+            .footer {
+                text-align: center;
+                padding: 0px 0;
+                width: 100%;
+            }
+        .container {
+            max-width: 1000px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5 mb-5 form-container">
+    <form th:action="@{/registration}" method="post" id="myForm" onsubmit="return validateForm()">
+        <hr class="my-4">
+        <div class="p-5 text-center bg-light rounded">
+            <div class="d-flex align-items-center justify-content-between">
+                <h3 class="mb-0">Регистрация аккаунта</h3>
+                <div>
+                    <button class="btn btn-sm btn-primary" type="submit">Зарегистроваться</button>
+                    <a class="btn btn-sm btn-primary" href="/">Отменить</a>
+                </div>
+            </div>
+            <hr class="my-4"><br>
+            <table class="table table-bordered">
+                <tr>
+                    <th>Логин</th>
+                    <td><input  type="text" name="login" class="form-control" id="login" onblur="validField(this, 'login')"/>
+                        <span id="loginError"  style="color: red;"></span></td>
+
+                </tr>
+                <tr>
+                    <th>Пароль</th>
+                    <td><input  type="text" name="password" class="form-control" id="password" onblur="validField(this, 'password')"/>
+                        <span id="passwordError" style="color: red;"></span></td>
+                </tr>
+                <tr>
+                    <th>Название фирмы</th>
+                    <td><input  type="text" name="namefirm" class="form-control" id="namefirm" onblur="validField(this, 'namefirm')"/>
+                        <span id="namefirmError"  style="color: red;"></span></td>
+                </tr>
+                <tr>
+                    <th>Почта</th>
+                    <td><input type="text" name="email" class="form-control" id="email" onblur="validField(this, 'email')"/>
+                        <span id="emailError"  style="color: red;"></span></td>
+                </tr>
+                <tr>
+                    <th>Телефон</th>
+                    <td><input type="text" name="phone" class="form-control" id="phone" onblur="validField(this, 'phone')"/>
+                        <span id="phoneError" style="color: red;"></span></td>
+                </tr>
+            </table>
+
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <h4 class="mb-0">Роль: <span id="selectedRole">не выбран</span></h4>
+                </div>
+                <div class="col-auto">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Выбрать
+                        </button>
+                        <span id="roleError"  style="color: red;"></span>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <li><p class="dropdown-item" th:data-value="firm" onclick="selectRole('Фирма-магазин')">Фирма-магазин</p></li>
+                            <li><p class="dropdown-item" th:data-value="delivery" onclick="selectRole('Фирма-доставщик')">Фирма-доставщик</p></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="selectedRole" id="selectedRoleInput"/>
+
+            <hr class="my-4"><br>
+
+            <div id="deliveryField" style="display: none;">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Адрес офиса</th>
+                        <td><input type="text" name="address" class="form-control" id="address" onblur="validField(this, 'address')"/>
+                            <span id="addressError" style="color: red;"></span></td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<div th:insert="blocks/footer :: footer"/>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+<script>
+    function selectRole(role) {
+            document.getElementById('selectedRole').innerText = role;
+            document.getElementById('selectedRoleInput').value = role;
+
+            if (role === 'Фирма-доставщик') {
+                document.getElementById('deliveryField').style.display = 'block';
+            } else {
+                document.getElementById('deliveryField').style.display = 'none';
+            }
+        }
+
+    function validField(element, nameField) {
+        var valueField = element.value;
+        var valid = true;
+        var errorMessage = "";
+
+        switch (nameField) {
+            case "address":
+                var errorMessage = "";
+                regular = /^([\u0410-\u044Fa-zA-Z]+\s?[0-9]*)+$/;
+                if(valueField.length < 5){
+                    valid = false;
+                    errorMessage = "Адрес должен быть длиной не менее 5 символов.";
+                }
+                else if(!regular.test(valueField)){
+                    valid = false;
+                    errorMessage = "Некорректный адрес.";
+                }
+                break;
+            case "login":
+                regular = /^([a-zA-Z]+[0-9]*)+$/
+                var errorMessage = "";
+                if(valueField.length < 5){
+                    valid = false;
+                    errorMessage = "Длина должна быть не меньше 5 символов.";
+                }
+                else if(!regular.test(valueField)){
+                    valid = false;
+                    errorMessage = "Некорректный логин.";
+                }
+                break;
+            case "password":
+            valid = valueField.length >= 5;
+                errorMessage = valid ? "" : "Пароль должен быть длиной не менее 5 символов.";
+                break;
+            case "phone":
+                var errorMessage = "";
+                regular = /^\+[0-9]{11}$/
+                if(valueField.length != 12){
+                    valid = false;
+                    errorMessage = "Телефон должен быть длиной в 11 символов и начинаться с +.";
+                }
+                else if(!regular.test(valueField)){
+                    valid = false;
+                    errorMessage = "Неверный формат! Пример +88005553535";
+                }
+                break;
+            case "namefirm":
+                regular = /^([\u0410-\u044Fa-zA-Z]+\s?[0-9]*\s?)+$/
+                var errorMessage = "";
+                if(valueField.length < 5){
+                    valid = false;
+                    errorMessage = "Длина должна быть не меньше 5 символов.";
+                }
+                else if(!regular.test(valueField)){
+                    valid = false;
+                    errorMessage = "Некорректное название.";
+                }
+                break;
+            case "email":
+                var regular =  /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$/
+                var errorMessage = "";
+                if(valueField.length < 5){
+                    valid = false;
+                    errorMessage = "Почта должна быть длиной не менее 5 символов.";
+                }
+                else if(!regular.test(valueField)){
+                    valid = false;
+                    errorMessage = "Некорректный формат почты! Пример: abc@gmail.com.";
+
+                }
+                break;
+            case "role":
+                valid = valueField == "Фирма-магазин" || valueField == "Фирма-доставщик"
+                errorMessage = valid ? "" : "Выберите роль";
+                break;
+
+        }
+
+        var errorElement = document.getElementById(nameField + "Error");
+        if (valid) {
+            element.style.borderColor = "green";
+            errorElement.textContent = "";
+        } else {
+            element.style.borderColor = "red";
+            errorElement.textContent = errorMessage;
+        }
+
+        return valid;
+    }
+
+    function validateForm() {
+        var loginField = document.getElementById("login");
+        var passwordField = document.getElementById("password");
+        var emailField = document.getElementById("email");
+        var phoneField = document.getElementById("phone");
+        var namefirmField = document.getElementById("namefirm");
+        var addressField = document.getElementById("address");
+        var roleField = document.getElementById("selectedRoleInput");
+
+        var addressValid = true;
+        var loginValid = validField(loginField, "login");
+        var passwordValid = validField(passwordField, "password");
+        var emailValid = validField(emailField, "email");
+        var phoneValid = validField(phoneField, "phone");
+        var namefirmValid = validField(namefirmField, "namefirm");
+        var roleValid = validField(roleField, "role");
+        if(roleValid && roleField.value != "Фирма-магазин"){
+            addressValid = validField(addressField, "address");
+        }
+
+        if (!loginValid || !passwordValid ||!emailValid ||!phoneValid ||!namefirmValid ||
+        !addressValid || !roleValid) {
+            alert("Пожалуйста, заполните все поля корректно перед отправкой формы.");
+            return false;
+        }
+        return true;
+    }
+</script>
+
+</body>
+</html>

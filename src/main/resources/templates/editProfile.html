@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактировать профиль</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<!--    <link rel="stylesheet" href="../static/css/css/styles.css">-->
+    <style>
+        .header {
+                text-align: center;
+                padding: 0px 0;
+                width: 100%;
+            }
+            .footer {
+                text-align: center;
+                padding: 0px 0;
+                width: 100%;
+            }
+        .container {
+            max-width: 1000px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<div th:insert="blocks/header :: header" class="header"/>
+
+<div class="container md-5 mt-5">
+    <form action="@{/edit}" method="post" id="myForm" onsubmit="return validateForm()">
+        <hr class="my-4">
+        <input type="hidden" th:value="${user.role}" id="role">
+        <div class="p-5 text-center bg-light rounded">
+            <div class="d-flex align-items-center justify-content-between">
+                <h3 class="mb-0">Редактировать аккаунт</h3>
+                <div>
+                    <button class="btn btn-sm btn-primary" type="submit" disabled >Сохранить (временно недоступно)</button>
+                    <a class="btn btn-sm btn-primary" href="/account" >Отменить</a>
+                </div>
+            </div>
+            <hr class="my-4"><br>
+            <table class="table table-bordered">
+                <tr>
+                    <th>Название фирмы</th>
+                    <td><input type="text" name="namefirm" class="form-control" th:field="${firm.name}" id="namefirm"
+                               onblur="validField(this, 'namefirm')"/>
+                        <span id="namefirmError" style="color: red;"></span></td>
+                </tr>
+                <tr>
+                    <th>Почта фирмы</th>
+                    <td><input type="text" name="email" class="form-control" th:field="${firm.email}" id="email"
+                               onblur="validField(this, 'email')"/>
+                        <span id="emailError" style="color: red;"></span></td>
+                </tr>
+                <tr>
+                    <th>Телефон фирмы</th>
+                    <td><input type="text" name="phone" class="form-control" th:field="${firm.phone}" id="phone"
+                               onblur="validField(this, 'phone')"/>
+                        <span id="phoneError" style="color: red;"></span></td>
+                </tr>
+                <tr th:if="${user.role == 'del'}">
+                    <th>Адрес офиса</th>
+                    <td><input type="text" name="address" class="form-control" th:field="${firm.address}" id="address"
+                               onblur="validField(this, 'address')"/>
+                        <span id="addressError" style="color: red;"></span></td>
+                </tr>
+                <tr th:if="${user.role != 'del'}">
+                    <th>Список магазинов</th>
+                    <td>
+                        <h5 th:if="${#lists.isEmpty(shops)}">Отсутствуют</h5>
+                        <div th:each="sh : ${shops}" class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 th:text="'Город: ' + ${sh.city.name} + ' Адрес: ' + ${sh.address}"></h6>
+                            <a class="btn btn-sm btn-primary ml-2" th:href="'/shop/edit/'+ ${sh.id}">Редактировать</a>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</div>
+
+
+<div th:insert="blocks/footer :: footer" class="footer"/>
+
+<script>
+    function validField(element, nameField) {
+        var valueField = element.value;
+        var valid = true;
+        var errorMessage = "";
+
+        switch (nameField) {
+            case "address":
+                var errorMessage = "";
+                regular = /^([\u0410-\u044Fa-zA-Z]+\s?[0-9]*)+$/;
+                if(valueField.length < 5){
+                    valid = false;
+                    errorMessage = "Адрес должен быть длиной не менее 5 символов.";
+                }
+                else if(!regular.test(valueField)){
+                    valid = false;
+                    errorMessage = "Некорректный адрес.";
+                }
+                break;
+            case "phone":
+                var errorMessage = "";
+                regular = /^\+[0-9]{11}$/
+                if(valueField.length != 12){
+                    valid = false;
+                    errorMessage = "Телефон должен быть длиной в 11 символов и начинаться с +.";
+                }
+                else if(!regular.test(valueField)){
+                    valid = false;
+                    errorMessage = "Неверный формат! Пример +88005553535";
+                }
+                break;
+            case "namefirm":
+                regular = /^([\u0410-\u044Fa-zA-Z]+\s?[0-9]*\s?)+$/
+                var errorMessage = "";
+                if(valueField.length < 5){
+                    valid = false;
+                    errorMessage = "Длина должна быть не меньше 5 символов.";
+                }
+                else if(!regular.test(valueField)){
+                    valid = false;
+                    errorMessage = "Некорректное название.";
+                }
+                break;
+            case "email":
+                var regular =  /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$/
+                var errorMessage = "";
+                if(valueField.length < 5){
+                    valid = false;
+                    errorMessage = "Почта должна быть длиной не менее 5 символов.";
+                }
+                else if(!regular.test(valueField)){
+                    valid = false;
+                    errorMessage = "Некорректный формат почты! Пример: abc@gmail.com.";
+                }
+                break;
+
+        }
+
+        var errorElement = document.getElementById(nameField + "Error");
+        if (valid) {
+            element.style.borderColor = "green";
+            errorElement.textContent = "";
+        } else {
+            element.style.borderColor = "red";
+            errorElement.textContent = errorMessage;
+        }
+
+        return valid;
+    }
+
+    function validateForm() {
+        var emailField = document.getElementById("email");
+        var phoneField = document.getElementById("phone");
+        var namefirmField = document.getElementById("namefirm");
+        var addressField = document.getElementById("address");
+        var roleField = document.getElementById("role");
+
+        var addressValid = true;
+        var passwordValid = validField(passwordField, "password");
+        var emailValid = validField(emailField, "email");
+        var phoneValid = validField(phoneField, "phone");
+        var namefirmValid = validField(namefirmField, "namefirm");
+        if(roleField.value != "Фирма-магазин"){
+            addressValid = validField(addressField, "address");
+        }
+
+        if (!passwordValid ||!emailValid ||!phoneValid ||!namefirmValid ||
+        !addressValid) {
+            alert("Пожалуйста, заполните все поля корректно перед отправкой формы.");
+            return false;
+        }
+        return true;
+    }
+</script>
+</body>
+</html>

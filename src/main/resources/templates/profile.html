@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<!--    <link rel="stylesheet" href="../static/css/css/styles.css">-->
+    <style>
+        .header {
+                text-align: center;
+                padding: 0px 0;
+                width: 100%;
+            }
+            .footer {
+                text-align: center;
+                padding: 0px 0;
+                width: 100%;
+            }
+        .container {
+            max-width: 1000px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<div th:insert="blocks/header :: header" class="header"/>
+
+<div class="container md-5 mt-5">
+    <hr class="my-4">
+    <div class="p-5 text-center bg-light rounded">
+        <div class="d-flex align-items-center justify-content-between">
+            <h3 class="mb-0">Информация об аккаунте</h3>
+            <div>
+                <a class="btn btn-sm btn-primary ml-2" th:href="'/account/myorders'" >Мои заявки</a>
+                <a class="btn btn-sm btn-primary ml-2" href="/edit">Редактировать профиль</a>
+            </div>
+        </div>
+        <hr class="my-4"><br>
+        <table class="table table-bordered">
+            <tr>
+                <th>Номер аккаунта</th>
+                <td th:text="${user.id}"/>
+            </tr>
+            <tr>
+                <th>Название фирмы</th>
+                <td th:text="${profile.name}"/>
+            </tr>
+            <tr>
+                <th>Почта фирмы</th>
+                <td th:text="${profile.email}"/>
+            </tr>
+            <tr>
+                <th>Телефон фирмы</th>
+                <td th:text="${profile.phone}"/>
+            </tr>
+            <tr>
+                <th>Ваша роль</th>
+                <td th:if="${user.role == 'del'}" th:text="Фирма-доставка"/>
+                <td th:if="${user.role == 'shop'}" th:text="Фирма-магазин"/>
+            </tr>
+            <tr>
+                <th>Дата регистрации</th>
+                <td th:text="${#dates.format(user.registrationDate, 'dd-MM-yyyy')}"/>
+            </tr>
+            <tr th:if="${user.role != 'del'}">
+                <th>Список магазинов</th>
+                <td>
+                    <h5 th:if="${#lists.isEmpty(shops)}">Отсутствуют</h5>
+                    <div th:each="sh : ${shops}">
+                        <h6 th:text="'Город: ' + ${sh.city.name} + ' Адрес: ' + ${sh.address}"/>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${user.role == 'del'}">
+                <th>Адрес офиса</th>
+                <td th:text="${profile.address}"/>
+            </tr>
+        </table>
+    </div>
+    <br>
+    <div class="d-flex justify-content-center">
+        <a th:if="${user.role == 'shop'}" class="btn btn-lg btn-primary w-50 mx-2"  th:href="'/account/createshop'" >Добавить магазин</a>
+        <a th:if="${user.role == 'shop'}" class="btn btn-lg btn-primary w-50 mx-2" th:href="'/account/createorder'" >Создать заявку</a>
+    </div>
+</div>
+
+<div th:insert="blocks/footer :: footer" class="footer"/>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
